@@ -53,7 +53,7 @@
        :filename (.getPath editor)
        :range [[(.-row start) (.-column start)]
                [(.-row end) (cond-> (.-column end)
-                                    (not= (.-column start) (.-column end)) dec)]]})))
+                              (not= (.-column start) (.-column end)) dec)]]})))
 
 (defn- notify! [{:keys [type title message]}]
   (case type
@@ -292,10 +292,16 @@
 (defn clear-inline! []
   (inline/clear-results! (atom/current-editor)))
 
+(defn eval-code [code callback]
+  (some-> @state :tooling-state deref :clj/aux
+          (eval/evaluate code
+                         {})))
+
 (def exports
   #js {:get_top_block #(get-code "top-block")
        :get_block #(get-code "block")
        :get_var #(get-code "var")
        :get_selection #(get-code "selection")
        :get_namespace #(get-code "ns")
-       :evaluate_and_present evaluate-and-present})
+       :evaluate_and_present evaluate-and-present
+       :eval_code eval-code})
